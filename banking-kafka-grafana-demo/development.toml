@@ -1,2 +1,2 @@
 [servers.kafka-demo]
-url = "http://kafka-demo-ksqldb-server-1:8088"
+url = "http://ksqldb-server:8088"

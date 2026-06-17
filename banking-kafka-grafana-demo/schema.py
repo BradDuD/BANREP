@@ -25,7 +25,7 @@ class EventoTransaccion(BaseModel):
     )
 
 
-# ─── DATOS MOCK CHILENOS ──────────────────────────────────────────────────────
+# ─── DATOS MOCK / SIMULACIÓN ──────────────────────────────────────────────────────
 
 CLIENTES = [
     {"rut": "12.345.678-9", "nombre": "Valentina Rojas Fuentes"},
@@ -41,25 +41,29 @@ CLIENTES = [
 TIPOS_TRANSACCION = ["transferencia", "pago", "compra", "retiro"]
 
 COMERCIOS = [
-    "Falabella", "Ripley", "Líder", "Jumbo", "Paris",
-    "Entel", "Movistar", "Netflix Chile", "Uber Chile",
-    "Shell Estación", "Copec", "Farmacia Cruz Verde",
-    "McDonald's Chile", "Subway", "Starbucks Las Condes",
+    "Falabella", "D1", "Tiendas ARA", "Dollarcity", "Rappi",
+    "Claro", "Movistar", "Netflix", "Uber",
+    "Didi", "Copec", "Farmacia Cruz Verde",
+    "McDonald's", "KFC", "Koaj",
     None, None,  # transferencias no tienen comercio
 ]
 
 REGIONES = [
-    "Metropolitana", "Valparaíso", "Biobío",
-    "La Araucanía", "Los Lagos", "Antofagasta",
-    "Coquimbo", "O'Higgins",
+    "Usaquén", "Chapinero", "Santa Fe",
+    "San Cristóbal", "Usme", "Tunjuelito",
+    "Bosa", "Kennedy", "Fontibón",
+    "Engativá", "Suba",
+    "Barrios Unidos", "Teusaquillo", "Los Mártires",
+    "Antonio Nariño", "Puente Aranda", "La Candelaria",
+    "Rafael Uribe Uribe", "Ciudad Bolívar", "Sumapaz",
 ]
 
-# Rangos de monto por tipo (en CLP)
+# Rangos de monto por tipo (en COP)
 RANGOS_MONTO = {
     "transferencia": (50_000, 5_000_000),
-    "pago":          (5_000, 500_000),
-    "compra":        (2_990, 299_990),
-    "retiro":        (10_000, 200_000),
+    "pago":          (2_000, 1_000_000),
+    "compra":        (1_990, 999_990),
+    "retiro":        (10_000, 800_000),
 }
 
 
