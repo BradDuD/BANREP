@@ -4,8 +4,8 @@ Topic: transacciones → analiza → topic: alertas
 
 Detecta transacciones sospechosas y publica alertas en un topic aparte.
 Reglas de fraude (simples, para la demo):
-  - Monto > $2.000.000 CLP en compra o retiro
-  - Monto > $5.000.000 CLP en cualquier tipo
+  - Monto > $2.000.000 COP en compra o retiro
+  - Monto > $5.000.000 COP en cualquier tipo
 """
 
 import json
@@ -27,7 +27,7 @@ TOPIC_ENTRADA   = "transacciones"
 TOPIC_ALERTAS   = "alertas"
 GROUP_ID        = "deteccion-fraude"
 
-# Umbrales en CLP
+# Umbrales en COP
 UMBRAL_COMPRA_RETIRO = 2_000_000
 UMBRAL_GENERAL       = 5_000_000
 
@@ -39,12 +39,12 @@ console = Console()
 def evaluar_fraude(evento: EventoTransaccion) -> str | None:
     """Retorna motivo de la alerta o None si no hay fraude."""
     if evento.monto > UMBRAL_GENERAL:
-        return f"Monto extremadamente alto: ${evento.monto:,.0f} CLP"
+        return f"Monto extremadamente alto: ${evento.monto:,.0f} COP"
 
     if evento.tipo in ("compra", "retiro") and evento.monto > UMBRAL_COMPRA_RETIRO:
         return (
             f"{evento.tipo.capitalize()} inusual: "
-            f"${evento.monto:,.0f} CLP supera umbral de ${UMBRAL_COMPRA_RETIRO:,}"
+            f"${evento.monto:,.0f} COP supera umbral de ${UMBRAL_COMPRA_RETIRO:,}"
         )
 
     return None
@@ -53,7 +53,7 @@ def evaluar_fraude(evento: EventoTransaccion) -> str | None:
 def construir_alerta(evento: EventoTransaccion, motivo: str) -> dict:
     return {
         "evento_id": evento.evento_id,
-        "rut":       evento.rut,
+        "cc":       evento.cc,
         "nombre":    evento.nombre,
         "monto":     evento.monto,
         "tipo":      evento.tipo,
@@ -100,15 +100,15 @@ def main():
                 alerta = construir_alerta(evento, motivo)
                 producer_alertas.send(
                     TOPIC_ALERTAS,
-                    key=evento.rut,
+                    key=evento.cc,
                     value=alerta,
                 )
                 producer_alertas.flush()
 
                 tabla = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
                 tabla.add_row("[red]cliente[/]", evento.nombre)
-                tabla.add_row("[red]rut[/]",     evento.rut)
-                tabla.add_row("[red]monto[/]",   f"[bold red]${evento.monto:,.0f} CLP[/]")
+                tabla.add_row("[red]cc[/]",     evento.cc)
+                tabla.add_row("[red]monto[/]",   f"[bold red]${evento.monto:,.0f} COP[/]")
                 tabla.add_row("[red]tipo[/]",    evento.tipo)
                 tabla.add_row("[red]región[/]",  evento.region)
                 tabla.add_row("[red]motivo[/]",  motivo)
@@ -121,7 +121,7 @@ def main():
             else:
                 console.print(
                     f"[dim]✓ Sin fraude — {evento.nombre} "
-                    f"${evento.monto:,.0f} CLP ({evento.tipo})[/]"
+                    f"${evento.monto:,.0f} COP ({evento.tipo})[/]"
                 )
 
     except KeyboardInterrupt:

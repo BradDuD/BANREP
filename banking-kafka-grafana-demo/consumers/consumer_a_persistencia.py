@@ -40,9 +40,9 @@ def insertar_transaccion(conn, evento: EventoTransaccion) -> None:
     with conn.cursor() as cur:
         cur.execute("""
             INSERT INTO transacciones
-                (evento_id, rut, nombre, tipo, monto, moneda, comercio, region, timestamp)
+                (evento_id, cc, nombre, tipo, monto, moneda, comercio, region, timestamp)
             VALUES
-                (%(evento_id)s, %(rut)s, %(nombre)s, %(tipo)s, %(monto)s,
+                (%(evento_id)s, %(cc)s, %(nombre)s, %(tipo)s, %(monto)s,
                  %(moneda)s, %(comercio)s, %(region)s, %(timestamp)s)
             ON CONFLICT (evento_id) DO NOTHING
         """, evento.model_dump())
@@ -80,7 +80,7 @@ def main():
             tabla = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
             tabla.add_row("[cyan]cliente[/]",   evento.nombre)
             tabla.add_row("[cyan]tipo[/]",      evento.tipo)
-            tabla.add_row("[cyan]monto[/]",     f"${evento.monto:,.0f} CLP")
+            tabla.add_row("[cyan]monto[/]",     f"${evento.monto:,.0f} COP")
             tabla.add_row("[cyan]partición[/]", str(mensaje.partition))
             tabla.add_row("[cyan]offset[/]",    str(mensaje.offset))
 

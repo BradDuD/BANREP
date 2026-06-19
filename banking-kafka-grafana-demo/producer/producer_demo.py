@@ -36,12 +36,12 @@ def evento_normal(cliente_idx: int = 0) -> EventoTransaccion:
     """Transacción normal — no activa fraude."""
     cliente = CLIENTES[cliente_idx]
     return EventoTransaccion(
-        rut=cliente["rut"],
+        cc=cliente["cc"],
         nombre=cliente["nombre"],
         tipo="compra",
         monto=45_990.0,
-        comercio="Jumbo",
-        region="Metropolitana",
+        comercio="D1",
+        region="Chapinero",
     )
 
 
@@ -49,12 +49,12 @@ def evento_fraude(cliente_idx: int = 1) -> EventoTransaccion:
     """Transacción sospechosa — monto alto, activa fraude."""
     cliente = CLIENTES[cliente_idx]
     return EventoTransaccion(
-        rut=cliente["rut"],
+        cc=cliente["cc"],
         nombre=cliente["nombre"],
         tipo="retiro",
-        monto=7_500_000.0,
+        monto=11_500_000.0,
         comercio=None,
-        region="Antofagasta",
+        region="Usme",
     )
 
 
@@ -63,8 +63,8 @@ def evento_fraude(cliente_idx: int = 1) -> EventoTransaccion:
 def mostrar_menu():
     console.print()
     console.print("[bold white]¿Qué evento quieres enviar?[/]")
-    console.print("  [bold green][1][/] Evento normal    — compra $45.990 en Jumbo")
-    console.print("  [bold red][2][/] Evento FRAUDE    — retiro $7.500.000 (activa alerta)")
+    console.print("  [bold green][1][/] Evento normal    — compra $45.990 en D1")
+    console.print("  [bold red][2][/] Evento FRAUDE    — retiro $11.500.000 (activa alerta)")
     console.print("  [bold cyan][3][/] Elegir cliente   — seleccionar de la lista")
     console.print("  [bold yellow][q][/] Salir")
     console.print()
@@ -74,10 +74,10 @@ def mostrar_clientes():
     tabla = Table(title="Clientes disponibles", box=box.SIMPLE, show_lines=True)
     tabla.add_column("#", style="cyan", width=4)
     tabla.add_column("Nombre", style="white")
-    tabla.add_column("RUT", style="dim")
+    tabla.add_column("CC", style="dim")
 
     for i, c in enumerate(CLIENTES):
-        tabla.add_row(str(i), c["nombre"], c["rut"])
+        tabla.add_row(str(i), c["nombre"], c["cc"])
 
     console.print(tabla)
 
@@ -90,11 +90,11 @@ def mostrar_evento_enviado(evento: EventoTransaccion, partition: int, offset: in
     tabla = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
     tabla.add_row("[bold cyan]evento_id[/]",  evento.evento_id[:8] + "...")
     tabla.add_row("[bold cyan]cliente[/]",    evento.nombre)
-    tabla.add_row("[bold cyan]rut[/]",        evento.rut)
+    tabla.add_row("[bold cyan]cc[/]",        evento.cc)
     tabla.add_row("[bold cyan]tipo[/]",       evento.tipo)
     tabla.add_row(
         "[bold cyan]monto[/]",
-        f"[bold {color}]${evento.monto:,.0f} CLP[/]"
+        f"[bold {color}]${evento.monto:,.0f} COP[/]"
     )
     tabla.add_row("[bold cyan]comercio[/]",   evento.comercio or "—")
     tabla.add_row("[bold cyan]región[/]",     evento.region)
@@ -180,7 +180,7 @@ def main():
         # Enviar
         future = producer.send(
             TOPIC,
-            key=evento.rut,
+            key=evento.cc,
             value=evento.model_dump(),
         )
         metadata = future.get(timeout=10)

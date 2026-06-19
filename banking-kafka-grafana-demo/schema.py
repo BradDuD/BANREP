@@ -13,11 +13,11 @@ from pydantic import BaseModel, Field
 
 class EventoTransaccion(BaseModel):
     evento_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    rut: str
+    cc: str
     nombre: str
     tipo: str                    # transferencia | pago | compra | retiro
     monto: float
-    moneda: str = "CLP"
+    moneda: str = "COP"
     comercio: str | None = None
     region: str
     timestamp: str = Field(
@@ -28,21 +28,21 @@ class EventoTransaccion(BaseModel):
 # ─── DATOS MOCK / SIMULACIÓN ──────────────────────────────────────────────────────
 
 CLIENTES = [
-    {"rut": "12.345.678-9", "nombre": "Valentina Rojas Fuentes"},
-    {"rut": "15.678.901-2", "nombre": "Matías Contreras Pizarro"},
-    {"rut": "11.222.333-4", "nombre": "Camila Soto Herrera"},
-    {"rut": "16.987.654-3", "nombre": "Diego Muñoz Araya"},
-    {"rut": "13.456.789-0", "nombre": "Javiera Espinoza Lagos"},
-    {"rut": "14.321.654-K", "nombre": "Sebastián Vidal Morales"},
-    {"rut": "17.654.321-5", "nombre": "Constanza Medina Riquelme"},
-    {"rut": "10.987.654-6", "nombre": "Nicolás Fuentes Bravo"},
+    {"cc": "12.345.678-9", "nombre": "Valentina Rojas Fuentes"},
+    {"cc": "15.678.901-2", "nombre": "Matías Contreras Pizarro"},
+    {"cc": "11.222.333-4", "nombre": "Camila Soto Herrera"},
+    {"cc": "16.987.654-3", "nombre": "Diego Muñoz Araya"},
+    {"cc": "13.456.789-0", "nombre": "Javiera Espinoza Lagos"},
+    {"cc": "14.321.654-K", "nombre": "Sebastián Vidal Morales"},
+    {"cc": "17.654.321-5", "nombre": "Constanza Medina Riquelme"},
+    {"cc": "10.987.654-6", "nombre": "Nicolás Fuentes Bravo"},
 ]
 
 TIPOS_TRANSACCION = ["transferencia", "pago", "compra", "retiro"]
 
 COMERCIOS = [
     "Falabella", "D1", "Tiendas ARA", "Dollarcity", "Rappi",
-    "Claro", "Movistar", "Netflix", "Uber",
+    "Claro", "Movistar", "Netflix", "Uber","OXXO"
     "Didi", "Copec", "Farmacia Cruz Verde",
     "McDonald's", "KFC", "Koaj",
     None, None,  # transferencias no tienen comercio
@@ -75,12 +75,12 @@ def generar_transaccion() -> EventoTransaccion:
 
     # Simula ocasionalmente montos sospechosos (fraude)
     if random.random() < 0.08:  # 8% de probabilidad
-        monto = random.uniform(3_000_000, 9_500_000)
+        monto = random.uniform(8_000_000, 20_500_000)
     else:
         monto = random.uniform(monto_min, monto_max)
 
     return EventoTransaccion(
-        rut=cliente["rut"],
+        cc=cliente["cc"],
         nombre=cliente["nombre"],
         tipo=tipo,
         monto=round(monto, 2),

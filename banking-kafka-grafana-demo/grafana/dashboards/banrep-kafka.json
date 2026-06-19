@@ -51,13 +51,13 @@
     },
     {
       "id": 4,
-      "title": "Monto Acumulado (CLP)",
+      "title": "Monto Acumulado (COP)",
       "type": "stat",
       "gridPos": { "x": 12, "y": 4, "w": 12, "h": 4 },
       "targets": [
         {
-          "expr": "sum(banrep_monto_total_clp_total)",
-          "legendFormat": "Total CLP"
+          "expr": "sum(banrep_monto_total_cop_total)",
+          "legendFormat": "Total COP"
         }
       ],
       "fieldConfig": {
@@ -73,7 +73,7 @@
       "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "banrep_monto_clp_bucket",
+          "expr": "banrep_monto_cop_bucket",
           "legendFormat": "{{le}}"
         }
       ]

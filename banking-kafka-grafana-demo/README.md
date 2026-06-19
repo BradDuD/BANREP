@@ -105,7 +105,7 @@ docker exec -it kafka-demo-ksqldb-cli-1 ksql-connect.sh http://kafka-demo-ksqldb
 ```sql
 CREATE STREAM transacciones (
   evento_id VARCHAR,
-  rut       VARCHAR,
+  cc       VARCHAR,
   nombre    VARCHAR,
   tipo      VARCHAR,
   monto     DOUBLE,
@@ -142,7 +142,7 @@ EMIT CHANGES;
 
 -- Stream derivado persistente — crea nuevo topic en Kafka
 CREATE STREAM alertas_ksql AS
-  SELECT evento_id, nombre, rut, monto, region,
+  SELECT evento_id, nombre, cc, monto, region,
          'MONTO_ALTO' AS motivo
   FROM transacciones
   WHERE monto > 2000000

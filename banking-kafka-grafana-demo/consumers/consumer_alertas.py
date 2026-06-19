@@ -57,8 +57,8 @@ def main():
 
             tabla.add_row("N° Alerta",  str(contador))
             tabla.add_row("Cliente",    alerta.get("nombre", "—"))
-            tabla.add_row("RUT",        alerta.get("rut", "—"))
-            tabla.add_row("Monto",      f"${alerta.get('monto', 0):,.0f} CLP")
+            tabla.add_row("C.C",        alerta.get("cc", "—"))
+            tabla.add_row("Monto",      f"${alerta.get('monto', 0):,.0f} COP")
             tabla.add_row("Tipo",       alerta.get("tipo", "—"))
             tabla.add_row("Región",     alerta.get("region", "—"))
             tabla.add_row("Motivo",     alerta.get("motivo", "—"))

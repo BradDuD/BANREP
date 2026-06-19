@@ -25,7 +25,7 @@ from schema import generar_transaccion
 
 KAFKA_BROKER = "localhost:9092"
 TOPIC        = "transacciones"
-INTERVALO_SEG = 1.5   # pausa entre eventos
+INTERVALO_SEG = 0.5   # pausa entre eventos
 
 console = Console()
 
@@ -36,7 +36,7 @@ def crear_producer() -> KafkaProducer:
     return KafkaProducer(
         bootstrap_servers=KAFKA_BROKER,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        # La key es el RUT — garantiza orden por cliente en la misma partición
+        # La key es la CC — garantiza orden por cliente en la misma partición
         key_serializer=lambda k: k.encode("utf-8"),
     )
 
@@ -44,7 +44,7 @@ def crear_producer() -> KafkaProducer:
 def publicar_evento(producer: KafkaProducer, evento) -> None:
     future = producer.send(
         TOPIC,
-        key=evento.rut,
+        key=evento.cc,
         value=evento.model_dump(),
     )
     metadata = future.get(timeout=10)
@@ -56,7 +56,7 @@ def publicar_evento(producer: KafkaProducer, evento) -> None:
     tabla.add_row("[bold cyan]tipo[/]",      evento.tipo)
     tabla.add_row(
         "[bold cyan]monto[/]",
-        f"[bold yellow]${evento.monto:,.0f} CLP[/]"
+        f"[bold yellow]${evento.monto:,.0f} COP[/]"
     )
     tabla.add_row("[bold cyan]región[/]",    evento.region)
     tabla.add_row("[bold cyan]partición[/]", str(metadata.partition))
@@ -87,7 +87,7 @@ def main():
             publicar_evento(producer, evento)
             contador += 1
             console.print(f"[dim]Total publicados: {contador}[/]\n")
-            time.sleep(random.uniform(0.8, INTERVALO_SEG))
+            time.sleep(random.uniform(0.8, INTERVALO_SEG)) # CAMBIAR INTERVALO DE TIEMPO PARA GENERACION DE TRANSACCIONES
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Producer detenido.[/]")

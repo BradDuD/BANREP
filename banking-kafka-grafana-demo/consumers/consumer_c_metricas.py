@@ -36,14 +36,14 @@ transacciones_total = Counter(
 )
 
 monto_total = Counter(
-    "banrep_monto_total_clp",
-    "Monto acumulado en CLP",
+    "banrep_monto_total_cop",
+    "Monto acumulado en COP",
     ["tipo"],
 )
 
 monto_histogram = Histogram(
-    "banrep_monto_clp",
-    "Distribución de montos en CLP",
+    "banrep_monto_cop",
+    "Distribución de montos en COP",
     buckets=[10_000, 50_000, 100_000, 500_000, 1_000_000, 5_000_000],
 )
 
