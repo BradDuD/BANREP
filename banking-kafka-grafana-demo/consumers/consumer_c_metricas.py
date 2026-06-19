@@ -44,7 +44,7 @@ monto_total = Counter(
 monto_histogram = Histogram(
     "banrep_monto_cop",
     "Distribución de montos en COP",
-    buckets=[10_000, 50_000, 100_000, 500_000, 1_000_000, 5_000_000],
+    buckets=[10_000, 50_000, 100_000, 500_000, 1_000_000, 5_000_000, 10_000_000],
 )
 
 transacciones_activas = Gauge(
@@ -57,20 +57,70 @@ alertas_potenciales = Counter(
     "Transacciones que superan umbral de fraude",
 )
 
+# Timestamp del último evento recibido
+ultimo_evento_timestamp = Gauge(
+    "banrep_ultimo_evento_timestamp",
+    "Timestamp Unix de la última transacción recibida"
+)
+
+# Clientes únicos observados
+clientes_unicos = Gauge(
+    "banrep_clientes_unicos",
+    "Cantidad de clientes únicos procesados"
+)
+
+# Monto acumulado por cliente
+monto_por_cliente = Counter(
+    "banrep_cliente_monto_total_cop",
+    "Monto acumulado por cliente",
+    ["cliente"]
+)
+
+# Transacciones por cliente
+transacciones_por_cliente = Counter(
+    "banrep_cliente_transacciones_total",
+    "Cantidad de transacciones por cliente",
+    ["cliente"]
+)
+
+# ─── ESTADO INTERNO ──────────────────────────────────────────────────────────
+
+clientes_vistos = set()
 
 # ─── CONSUMER ─────────────────────────────────────────────────────────────────
 
 def procesar_evento(evento: EventoTransaccion) -> None:
     """Actualiza todas las métricas con los datos del evento."""
+
+    # Total de transacciones por tipo y región
     transacciones_total.labels(
         tipo=evento.tipo,
         region=evento.region,
     ).inc()
 
-    monto_total.labels(tipo=evento.tipo).inc(evento.monto)
-    monto_histogram.observe(evento.monto)
-    transacciones_activas.inc()
+    # Monto acumulado por tipo
+    monto_total.labels(
+        tipo=evento.tipo
+    ).inc(evento.monto)
 
+    # Histograma de montos
+    monto_histogram.observe(evento.monto)
+
+    # Clientes únicos
+    clientes_vistos.add(evento.cc)
+    clientes_unicos.set(len(clientes_vistos))
+
+    # Monto acumulado por cliente
+    monto_por_cliente.labels(
+        cliente=evento.nombre
+    ).inc(evento.monto)
+
+    # Número de transacciones por cliente
+    transacciones_por_cliente.labels(
+        cliente=evento.nombre
+    ).inc()
+
+    # Fraude potencial
     if evento.monto > 2_000_000:
         alertas_potenciales.inc()
 

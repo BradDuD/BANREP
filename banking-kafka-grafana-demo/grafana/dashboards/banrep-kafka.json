@@ -1,14 +1,19 @@
 {
-  "title": "BANREP — Kafka Demo: Transacciones en Tiempo Real",
+  "title": "BANREP — Kafka Demo: Transacciones en Tiempo Real 2",
   "uid": "banrep-kafka-demo",
-  "version": 1,
+  "version": 2,
   "refresh": "5s",
   "panels": [
     {
       "id": 1,
       "title": "Transacciones por Minuto",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "rate(banrep_transacciones_total[1m]) * 60",
@@ -20,7 +25,12 @@
       "id": 2,
       "title": "Total Transacciones",
       "type": "stat",
-      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "sum(banrep_transacciones_total)",
@@ -32,7 +42,12 @@
       "id": 3,
       "title": "🚨 Alertas de Fraude",
       "type": "stat",
-      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "banrep_alertas_fraude_potencial_total",
@@ -43,8 +58,14 @@
         "colorMode": "background",
         "thresholds": {
           "steps": [
-            { "color": "green", "value": 0 },
-            { "color": "red", "value": 1 }
+            {
+              "color": "green",
+              "value": 0
+            },
+            {
+              "color": "red",
+              "value": 1
+            }
           ]
         }
       }
@@ -53,7 +74,12 @@
       "id": 4,
       "title": "Monto Acumulado (COP)",
       "type": "stat",
-      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 4 },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "sum(banrep_monto_total_cop_total)",
@@ -70,7 +96,12 @@
       "id": 5,
       "title": "Distribución de Montos",
       "type": "histogram",
-      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "banrep_monto_cop_bucket",
@@ -82,15 +113,202 @@
       "id": 6,
       "title": "Transacciones por Tipo",
       "type": "piechart",
-      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "sum by (tipo) (banrep_transacciones_total)",
           "legendFormat": "{{tipo}}"
         }
       ]
+    },
+    {
+      "id": 7,
+      "title": "TPS Actual",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(banrep_transacciones_total[1m])) * 60",
+          "legendFormat": "TPS"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Ticket Promedio (COP)",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 16,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(banrep_monto_total_cop_total[5m])) / clamp_min(sum(rate(banrep_transacciones_total[5m])), 0.000001)",
+          "legendFormat": "Promedio"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Tasa de Fraude (%)",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(banrep_alertas_fraude_potencial_total[5m])) / clamp_min(sum(rate(banrep_transacciones_total[5m])), 0.000001)",
+          "legendFormat": "Fraude"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "thresholds": {
+          "steps": [
+            {
+              "color": "green",
+              "value": 0
+            },
+            {
+              "color": "yellow",
+              "value": 0.01
+            },
+            {
+              "color": "red",
+              "value": 0.05
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "P95 del Monto",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 16,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(banrep_monto_cop_bucket[5m])) by (le))",
+          "legendFormat": "P95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Flujo de Monto por Minuto (COP/min)",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (tipo) (rate(banrep_monto_total_cop_total[5m])) * 60",
+          "legendFormat": "{{tipo}}"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Transacciones por Región",
+      "type": "barchart",
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "topk(8, sum by (region) (rate(banrep_transacciones_total[5m])) * 60)",
+          "legendFormat": "{{region}}"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Monto Acumulado por Tipo",
+      "type": "barchart",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (tipo) (banrep_monto_total_cop_total)",
+          "legendFormat": "{{tipo}}"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Alertas por Minuto",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(banrep_alertas_fraude_potencial_total[5m]) * 60",
+          "legendFormat": "Alertas/min"
+        }
+      ]
     }
   ],
   "schemaVersion": 39,
-  "time": { "from": "now-5m", "to": "now" }
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  }
 }
