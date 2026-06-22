@@ -87,7 +87,7 @@ def main():
             publicar_evento(producer, evento)
             contador += 1
             console.print(f"[dim]Total publicados: {contador}[/]\n")
-            time.sleep(random.uniform(0.8, INTERVALO_SEG)) # CAMBIAR INTERVALO DE TIEMPO PARA GENERACION DE TRANSACCIONES
+            time.sleep(random.uniform(0.1, INTERVALO_SEG)) # CAMBIAR INTERVALO DE TIEMPO PARA GENERACION DE TRANSACCIONES
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Producer detenido.[/]")
