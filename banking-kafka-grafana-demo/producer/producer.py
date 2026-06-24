@@ -25,10 +25,13 @@ from schema import generar_transaccion
 
 KAFKA_BROKER = "localhost:9092"
 TOPIC        = "transacciones"
-INTERVALO_SEG = 0.5   # pausa entre eventos
+INTERVALO_SEG = 1.5   # pausa entre eventos
 
 console = Console()
 
+# Umbrales en COP
+UMBRAL_COMPRA_RETIRO = 2_000_000
+UMBRAL_GENERAL       = 5_000_000
 
 # ─── PRODUCER ─────────────────────────────────────────────────────────────────
 
@@ -62,7 +65,7 @@ def publicar_evento(producer: KafkaProducer, evento) -> None:
     tabla.add_row("[bold cyan]partición[/]", str(metadata.partition))
     tabla.add_row("[bold cyan]offset[/]",    str(metadata.offset))
 
-    color = "red" if evento.monto > 2_000_000 else "green"
+    color = "red" if (evento.monto > UMBRAL_GENERAL or evento.tipo in ("compra", "retiro") and evento.monto > UMBRAL_COMPRA_RETIRO) else "green"
     console.print(Panel(
         tabla,
         title=f"[bold {color}]📤 EVENTO PUBLICADO[/]",
@@ -87,7 +90,7 @@ def main():
             publicar_evento(producer, evento)
             contador += 1
             console.print(f"[dim]Total publicados: {contador}[/]\n")
-            time.sleep(random.uniform(0.1, INTERVALO_SEG)) # CAMBIAR INTERVALO DE TIEMPO PARA GENERACION DE TRANSACCIONES
+            time.sleep(random.uniform(0.00000000000001, INTERVALO_SEG)) # CAMBIAR INTERVALO DE TIEMPO PARA GENERACION DE TRANSACCIONES
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Producer detenido.[/]")

@@ -118,7 +118,7 @@ def mostrar_evento_enviado(evento: EventoTransaccion, partition: int, offset: in
     else:
         console.print(Panel(
             "[green]✓ Monto normal.\n"
-            "Consumer A lo guardará en PostgreSQL.\n"
+            "Consumer A y D lo guardarán en PostgreSQL.\n"
             "Consumer B lo revisará y lo dejará pasar.\n"
             "Consumer C actualizará las métricas en Grafana.[/]",
             border_style="green",

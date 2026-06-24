@@ -1,5 +1,11 @@
 """
-consumer_a_persistencia.py — versión optimizada
+consumer_d_persistencia_alertas.py — Consumer Group: persistencia-alertas
+Topic: alertas → PostgreSQL (tabla alertas_fraude)
+
+Consumer D Persistencia Alertas (PostgreSQL)
+Consumer independiente del que detecta el fraude (consumer_b).
+Su única responsabilidad es persistir las alertas para histórico/auditoría,
+complementando las métricas en vivo de Prometheus con un registro durable.
 """
 
 import json
@@ -14,13 +20,12 @@ from rich.console import Console
 from rich.panel import Panel
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from schema import EventoTransaccion
 
 # ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 
 KAFKA_BROKER = "localhost:9092"
-TOPIC = "transacciones"
-GROUP_ID = "persistencia-db"
+TOPIC = "alertas"
+GROUP_ID = "persistencia-alertas"
 
 DB_CONFIG = {
     "host": "localhost",
@@ -30,33 +35,33 @@ DB_CONFIG = {
     "password": "banrep123",
 }
 
-BATCH_SIZE = 200          # flush si se acumulan este número de eventos
-FLUSH_INTERVAL = 1.5      # ...o si pasa este tiempo (segundos), lo primero que ocurra
-POLL_TIMEOUT_MS = 200     # cuánto espera cada poll() si no hay mensajes
+BATCH_SIZE = 20          # salvavidas si llega una ráfaga de alertas
+FLUSH_INTERVAL = 0.5     # las alertas se persisten casi en tiempo real
+POLL_TIMEOUT_MS = 200
 
 console = Console()
 
 
 # ─── PERSISTENCIA EN LOTE ─────────────────────────────────────────────────────
 
-def insertar_lote(conn, eventos: list[EventoTransaccion]) -> None:
-    if not eventos:
+def insertar_lote(conn, alertas: list[dict]) -> None:
+    if not alertas:
         return
 
     valores = [
         (
-            e.evento_id, e.cc, e.nombre, e.tipo, e.monto,
-            e.moneda, e.comercio, e.region, e.timestamp,
+            a["evento_id"], a["cc"], a["nombre"], a["tipo"],
+            a["monto"], a["region"], a["motivo"], a["timestamp"],
         )
-        for e in eventos
+        for a in alertas
     ]
 
     with conn.cursor() as cur:
         execute_values(
             cur,
             """
-            INSERT INTO transacciones
-                (evento_id, cc, nombre, tipo, monto, moneda, comercio, region, timestamp)
+            INSERT INTO alertas_fraude
+                (evento_id, cc, nombre, tipo, monto, region, motivo, timestamp)
             VALUES %s
             ON CONFLICT (evento_id) DO NOTHING
             """,
@@ -71,10 +76,12 @@ def insertar_lote(conn, eventos: list[EventoTransaccion]) -> None:
 
 def main():
     console.print(Panel(
-        f"[bold blue]Consumer A — Persistencia PostgreSQL[/]\n"
-        f"Group: [cyan]{GROUP_ID}[/] | Topic: [cyan]{TOPIC}[/]",
-        title="🗄️  BANREP Consumer A",
-        border_style="blue",
+        f"[bold yellow]Consumer D — Persistencia de Alertas PostgreSQL[/]\n"
+        f"Group: [cyan]{GROUP_ID}[/] | Topic: [cyan]{TOPIC}[/]\n\n"
+        "[dim]Guarda en alertas_fraude el histórico de fraude detectado.\n"
+        "Independiente de consumer_b y de consumer_alertas.[/]",
+        title="🗄️  BANREP Consumer D",
+        border_style="yellow",
     ))
 
     consumer = KafkaConsumer(
@@ -82,25 +89,25 @@ def main():
         bootstrap_servers=KAFKA_BROKER,
         group_id=GROUP_ID,
         auto_offset_reset="earliest",
-        enable_auto_commit=False,          # <- clave: control manual del offset
+        enable_auto_commit=False,
         value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     )
 
     conn = psycopg2.connect(**DB_CONFIG)
     console.print("[green]✓ Conectado a PostgreSQL[/]\n")
 
-    buffer: list[EventoTransaccion] = []
-    total_guardados = 0
+    buffer: list[dict] = []
+    total_guardadas = 0
     last_flush = time.time()
 
     def flush():
-        nonlocal buffer, total_guardados, last_flush
+        nonlocal buffer, total_guardadas, last_flush
         if not buffer:
             return
         insertar_lote(conn, buffer)
-        consumer.commit()                  # offset SOLO después del commit a Postgres
-        total_guardados += len(buffer)
-        console.print(f"[blue]💾 {total_guardados:,} registros guardados (lote de {len(buffer)})[/]")
+        consumer.commit()
+        total_guardadas += len(buffer)
+        console.print(f"[yellow]🗄️  {total_guardadas:,} alertas persistidas (lote de {len(buffer)})[/]")
         buffer = []
         last_flush = time.time()
 
@@ -110,15 +117,14 @@ def main():
 
             for _, mensajes in registros.items():
                 for mensaje in mensajes:
-                    evento = EventoTransaccion(**mensaje.value)
-                    buffer.append(evento)
+                    buffer.append(mensaje.value)
 
             ahora = time.time()
             if len(buffer) >= BATCH_SIZE or (buffer and ahora - last_flush >= FLUSH_INTERVAL):
                 flush()
 
     except KeyboardInterrupt:
-        console.print("\n[yellow]Consumer A detenido. Vaciando buffer restante...[/]")
+        console.print("\n[yellow]Consumer D detenido. Vaciando buffer restante...[/]")
         flush()
     finally:
         consumer.close()

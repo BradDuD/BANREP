@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from schema import EventoTransaccion
-
+from reglas_fraude import evaluar_fraude
 # ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 
 KAFKA_BROKER    = "localhost:9092"
@@ -36,18 +36,18 @@ console = Console()
 
 # ─── LÓGICA DE FRAUDE ─────────────────────────────────────────────────────────
 
-def evaluar_fraude(evento: EventoTransaccion) -> str | None:
-    """Retorna motivo de la alerta o None si no hay fraude."""
-    if evento.monto > UMBRAL_GENERAL:
-        return f"Monto extremadamente alto: ${evento.monto:,.0f} COP"
+# def evaluar_fraude(evento: EventoTransaccion) -> str | None:
+#     """Retorna motivo de la alerta o None si no hay fraude."""
+#     if evento.monto > UMBRAL_GENERAL:
+#         return f"Monto extremadamente alto: ${evento.monto:,.0f} COP"
 
-    if evento.tipo in ("compra", "retiro") and evento.monto > UMBRAL_COMPRA_RETIRO:
-        return (
-            f"{evento.tipo.capitalize()} inusual: "
-            f"${evento.monto:,.0f} COP supera umbral de ${UMBRAL_COMPRA_RETIRO:,}"
-        )
+#     if evento.tipo in ("compra", "retiro") and evento.monto > UMBRAL_COMPRA_RETIRO:
+#         return (
+#             f"{evento.tipo.capitalize()} inusual: "
+#             f"${evento.monto:,.0f} COP supera umbral de ${UMBRAL_COMPRA_RETIRO:,}"
+#         )
 
-    return None
+#     return None
 
 
 def construir_alerta(evento: EventoTransaccion, motivo: str) -> dict:

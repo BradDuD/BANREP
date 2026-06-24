@@ -71,13 +71,22 @@ python consumers/consumer_c_metricas.py
 python consumers/consumer_alertas.py
 ```
 
-**Terminal 5 — Producer interactivo (demo) o Producer automático:**
+**Terminal 5 — Consumer D Persistencia Alertas (PostgreSQL):**
+```bash
+python consumers/consumer_d_persistencia_alertas.py
+```
+
+**Terminal 6 — Producer interactivo (demo) o Producer automático:**
 ```bash
 # Demo manual — evento por evento
 python producer/producer_demo.py
 
 # O producer automático en loop
 python producer/producer.py
+```
+
+# O si queremos estresar el sistema.....
+python producer/producer_stress.py
 ```
 
 ### 4. Ver dashboards

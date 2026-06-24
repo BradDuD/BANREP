@@ -16,7 +16,7 @@ from rich.panel import Panel
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from schema import EventoTransaccion
-
+from reglas_fraude import evaluar_fraude
 # ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 
 KAFKA_BROKER     = "localhost:9092"
@@ -120,8 +120,9 @@ def procesar_evento(evento: EventoTransaccion) -> None:
         cliente=evento.nombre
     ).inc()
 
-    # Fraude potencial
-    if evento.monto > 2_000_000:
+    # Fraude potencial — misma regla que consumer_b, garantiza que esta métrica
+    # coincida exactamente con las alertas que se publican/persisten.
+    if evaluar_fraude(evento) is not None:
         alertas_potenciales.inc()
 
 

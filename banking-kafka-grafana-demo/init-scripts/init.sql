@@ -1,8 +1,10 @@
+-- BANREP — Esquema de base de datos
+
 -- Tabla principal de transacciones
 CREATE TABLE IF NOT EXISTS transacciones (
     id          SERIAL PRIMARY KEY,
     evento_id   VARCHAR(36)    NOT NULL UNIQUE,
-    cc         VARCHAR(12)    NOT NULL,
+    cc          VARCHAR(12)    NOT NULL,
     nombre      VARCHAR(100)   NOT NULL,
     tipo        VARCHAR(30)    NOT NULL,
     monto       NUMERIC(14, 2) NOT NULL,
@@ -13,17 +15,22 @@ CREATE TABLE IF NOT EXISTS transacciones (
     creado_en   TIMESTAMPTZ    DEFAULT NOW()
 );
 
--- Tabla de alertas de fraude
+-- Tabla de alertas de fraude 
 CREATE TABLE IF NOT EXISTS alertas_fraude (
     id          SERIAL PRIMARY KEY,
-    evento_id   VARCHAR(36)    NOT NULL,
-    cc         VARCHAR(12)    NOT NULL,
+    evento_id   VARCHAR(36)    NOT NULL UNIQUE,   -- UNIQUE para permitir ON CONFLICT
+    cc          VARCHAR(12)    NOT NULL,
+    nombre      VARCHAR(100),                     
+    tipo        VARCHAR(30),                       
     monto       NUMERIC(14, 2) NOT NULL,
+    region      VARCHAR(50),                      
     motivo      VARCHAR(200)   NOT NULL,
     timestamp   TIMESTAMPTZ    NOT NULL,
     creado_en   TIMESTAMPTZ    DEFAULT NOW()
 );
 
--- Índice para consultas por cc
-CREATE INDEX IF NOT EXISTS idx_transacciones_cc ON transacciones(cc);
-CREATE INDEX IF NOT EXISTS idx_alertas_cc ON alertas_fraude(cc);
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_transacciones_cc     ON transacciones(cc);
+CREATE INDEX IF NOT EXISTS idx_alertas_cc            ON alertas_fraude(cc);
+CREATE INDEX IF NOT EXISTS idx_alertas_tipo          ON alertas_fraude(tipo);
+CREATE INDEX IF NOT EXISTS idx_alertas_region        ON alertas_fraude(region);
