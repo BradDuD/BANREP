@@ -14,13 +14,14 @@ Demo para el video de YouTube **"Kafka desde cero"** y **"ksqlDB desde cero"**.
 
 ## Caso de uso
 
-Un cliente hace una transacción → el evento entra a Kafka → 3 consumer groups lo procesan en paralelo:
+Un cliente hace una transacción → el evento entra a Kafka → 4 consumer groups lo procesan en paralelo:
 
 | Consumer | Group ID | Función |
 |---|---|---|
 | A | `persistencia-db` | Inserta en PostgreSQL |
 | B | `deteccion-fraude` | Detecta fraude → publica en topic `alertas` |
 | C | `metricas-grafana` | Actualiza métricas Prometheus |
+| D | `persistencia-alertas` | Persistencia Alertas (PostgreSQL) |
 | Alertas | `log-alertas` | Consume topic `alertas` y loguea |
 
 Además, **ksqlDB** se conecta al mismo topic `transacciones` y permite hacer queries SQL en tiempo real sin tocar el código existente.
@@ -35,13 +36,13 @@ Además, **ksqlDB** se conecta al mismo topic `transacciones` y permite hacer qu
 docker compose up -d
 ```
 
-Esperar ~30 segundos para que Kafka esté listo. Verificar con:
+Esperar ~60 segundos para que Kafka esté listo. Verificar con:
 
 ```bash
 docker compose ps
 ```
 
-Deben aparecer 9 servicios en estado `Up`: zookeeper, kafka, postgres, prometheus, grafana, ksqldb-server, ksqldb-cli, ksqldb-ui.
+Deben aparecer 8 servicios en estado `Up`: zookeeper, kafka, postgres, prometheus, grafana, ksqldb-server, ksqldb-cli, ksqldb-ui.
 
 ### 2. Instalar dependencias Python
 
@@ -83,7 +84,7 @@ python producer/producer_demo.py
 
 # O producer automático en loop
 python producer/producer.py
-```
+
 
 # O si queremos estresar el sistema.....
 python producer/producer_stress.py
@@ -172,17 +173,21 @@ kafka-demo/
 ├── prometheus.yml
 ├── requirements.txt
 ├── development.toml               # Config de ksqlDB UI
-├── schema.py                      # Modelo + datos mock chilenos
+├── schema.py                      # Modelo + datos mock 
+├── reglas_fraude.py               # Reglas de negocio (FRAUDE) para consumer B y C
+├── start_consumers.bat            # Bat para iniciar todos los consumers
 ├── init-scripts/
 │   └── init.sql                   # Schema PostgreSQL
 ├── producer/
 │   ├── producer.py                # Genera eventos en loop automático
+│   ├── producer_stress.py         # Genera eventos de forma masiva en loop automático
 │   └── producer_demo.py           # Producer interactivo (demo en cámara)
 ├── consumers/
-│   ├── consumer_a_persistencia.py # → PostgreSQL
-│   ├── consumer_b_fraude.py       # → topic alertas
-│   ├── consumer_c_metricas.py     # → Prometheus/Grafana
-│   └── consumer_alertas.py        # lee topic alertas
+│   ├── consumer_a_persistencia.py         # → PostgreSQL
+│   ├── consumer_b_fraude.py               # → topic alertas
+│   ├── consumer_c_metricas.py             # → Prometheus/Grafana
+│   ├── consumer_alertas.py                # lee topic alertas
+│   └── consumer_d_persistencia_alertas.py # → PostgreSQL alertas
 └── grafana/
     ├── datasources/prometheus.yml
     └── dashboards/
