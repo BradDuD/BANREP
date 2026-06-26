@@ -1,6 +1,5 @@
 # BANREP — Kafka Demo: Transacciones Bancarias en Tiempo Real
 
-Demo para el video de YouTube **"Kafka desde cero"** y **"ksqlDB desde cero"**.
 
 ## Stack
 
