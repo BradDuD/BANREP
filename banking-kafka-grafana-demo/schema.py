@@ -62,13 +62,13 @@ REGIONES = [
 RANGOS_MONTO = {
     "transferencia": (50_000, 5_000_000),
     "pago":          (2_000, 1_000_000),
-    "compra":        (1_990, 999_990),
+    "compra":        (1_000, 3_000_000),
     "retiro":        (10_000, 800_000),
 }
 
 
 def generar_transaccion() -> EventoTransaccion:
-    """Genera una transacción aleatoria con datos chilenos."""
+    """Genera una transacción aleatoria con datos al aleatorios."""
     cliente = random.choice(CLIENTES)
     tipo = random.choice(TIPOS_TRANSACCION)
     monto_min, monto_max = RANGOS_MONTO[tipo]
